@@ -14,7 +14,7 @@ RUN if [ "${REINSTALL_CMAKE_VERSION_FROM_SOURCE}" != "none" ]; then \
 RUN apt-get update
 
 # install clangd
-RUN apt-get install -y clangd-20
+RUN apt-get install -y clangd-19
 
 # install mosquitto
 RUN apt-get install -y \

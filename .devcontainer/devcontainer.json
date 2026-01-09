@@ -11,7 +11,7 @@
 				"llvm-vs-code-extensions.vscode-clangd"
 			],
 			"settings": {
-				"clangd.path": "/usr/bin/clangd-20"
+				"clangd.path": "/usr/bin/clangd-19"
 			}
 		}
 	}
