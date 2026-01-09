@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "5555:5555"
+    command: >
+      sh -c "
+      echo 'listener 5555' >> /mosquitto/config/mosquitto.conf &&
+      echo 'allow_anonymous true' >> /mosquitto/config/mosquitto.conf &&
+      exec mosquitto -c /mosquitto/config/mosquitto.conf
+      "
