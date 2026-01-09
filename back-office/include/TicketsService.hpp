@@ -7,13 +7,13 @@ class TicketsService {
 public:
     explicit TicketsService(TicketsRepository& repo);
 
-    std::string create_ticket_base64(
+    std::pair<TicketErrorCode, std::string> create_ticket_base64(
         int validity_days,
         int line_number,
         int64_t request_date
     );
 
-    nlohmann::json validate_ticket_base64(const std::string& base64_ticket);
+    std::pair<TicketErrorCode, nlohmann::json> validate_ticket_base64(const std::string& base64_ticket);
 
 private:
     TicketsRepository& repository;
@@ -22,5 +22,5 @@ private:
     std::string base64_encode(const std::string& in);
     std::string base64_decode(const std::string& in);
 
-    bool is_expired(const Ticket& ticket, int64_t now);
+    bool is_expired(const Ticket& ticket);
 };

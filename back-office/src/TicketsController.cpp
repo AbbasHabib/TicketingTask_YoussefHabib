@@ -1,4 +1,5 @@
 #include "TicketsController.hpp"
+#include "Ticket.hpp"
 
 using json = nlohmann::json;
 
@@ -12,7 +13,7 @@ TicketsController::TicketsController(crow::SimpleApp& app, TicketsService& servi
         });
 
     CROW_ROUTE(app, "/api/v1/tickets/validations")
-        .methods(crow::HTTPMethod::POST)
+        .methods(crow::HTTPMethod::GET)
         ([this](const crow::request& req) {
             return validate_ticket(req);
         });
@@ -23,30 +24,42 @@ crow::response TicketsController::create_ticket(const crow::request& req)
     auto body = json::parse(req.body, nullptr, false);
     if (body.is_discarded()) return {400, "Invalid JSON"};
 
-    auto encoded = service.create_ticket_base64(
+    const auto& [err, result] = service.create_ticket_base64(
         body["validity_days"],
         body["line_number"],
         body["request_date"]
     );
 
-    return crow::response(201, encoded);
+    if(err != TicketErrorCode::NoErr)
+    {
+        return crow::response(400, result);
+    }
+    else
+    {
+        auto& encodedTicket = result;
+        return crow::response(201, encodedTicket);
+    }
 }
 
 crow::response TicketsController::validate_ticket(const crow::request& req)
 {
-    auto result = service.validate_ticket_base64(req.body);
+    const auto& [err, result] = service.validate_ticket_base64(req.body);
 
-    if (!result["valid"])
+    if (err != TicketErrorCode::NoErr)
     {
-        if (result["reason"] == "NOT_FOUND")
+        if (err == TicketErrorCode::NotFound)
         {
             return crow::response(404, result.dump());
         }
-        if (result["reason"] == "EXPIRED")
+        if (err == TicketErrorCode::Expired)
         {
             return crow::response(410, result.dump());
         }
-    }
 
-    return crow::response(200, result.dump());
+        return crow::response(400, result.dump());
+    }
+    else
+    {
+        return crow::response(200, result.dump());
+    }
 }

@@ -8,13 +8,18 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"llvm-vs-code-extensions.vscode-clangd"
+				"llvm-vs-code-extensions.vscode-clangd",
+				"humao.rest-client"
 			],
 			"settings": {
 				"clangd.path": "/usr/bin/clangd-19"
 			}
 		}
-	}
+	},
+	"initializeCommand": "mkdir -p ${localWorkspaceFolder}/.runtime-files",
+	"mounts":[
+		"source=${localWorkspaceFolder}/.runtime-files,target=/data,type=bind,consistency=cached"
+	]
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
