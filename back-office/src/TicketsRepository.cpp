@@ -71,7 +71,7 @@ std::vector<Ticket> TicketsRepository::find_all()
     return result;
 }
 
-int64_t TicketsRepository::get_last_ticket_id() const
+int64_t TicketsRepository::get_last_ticket_id()
 {
     auto data = load();
     int64_t max_id = 0;

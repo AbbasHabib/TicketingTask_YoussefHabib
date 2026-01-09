@@ -12,7 +12,7 @@ public:
     void save(const Ticket& ticket);
     std::optional<Ticket> find_by_id(int64_t ticket_id);
     std::vector<Ticket> find_all();
-    int64_t get_last_ticket_id() const;
+    int64_t get_last_ticket_id();
 
 private:
     std::string file_path;
