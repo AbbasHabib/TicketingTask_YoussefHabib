@@ -107,10 +107,13 @@ PUB /transport/tvm/1/event/create
   "request_date":1768071041
 }
 ```
+Note ℹ
+
+
+We are assuming the request date of ticket creation = creation date
 sample test
 ```mqtt
 PUB /transport/gate/GATE-1/event/validate
-eyJjcmVhdGlvbl9kYXRlIjoxNzY4MDcxMjA4LCJsaW5lX251bWJlciI6MiwidGlja2V0X2lkIjo5LCJ2YWxpZGl0eV9pbl9kYXlzIjo5OTl9
 
 ```
 

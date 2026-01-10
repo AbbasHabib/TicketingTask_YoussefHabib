@@ -28,7 +28,7 @@ std::pair<TicketErrorCode, std::string> TicketsService::create_ticket_base64(int
 
     Ticket ticket{
         m_repository.get_last_ticket_id() + 1, // TODO: very slow, + could face bad racing 
-        now,
+        request_date, // NOTE: As in the readme we are assuming that the creation date is the same as request date
         validity_in_days,
         line_number
     };

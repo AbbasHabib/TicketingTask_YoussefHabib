@@ -22,8 +22,8 @@ int main() {
     // TODO: 55556 such info should be fetched from a config manager
     std::thread http_server([&]{app.port(55556).run();});
 
-    // TODO: 55557 such info should be fetched from a config manager
-    const std::string server_address("127.0.0.1:55559");
+    // TODO: 55559 such info should be fetched from a config manager
+    const std::string server_address(GRPC_SERVER_URI);
 
     ticketing::TransactionTrackingServiceImpl transactionTrackingRPCservice;
 
