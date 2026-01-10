@@ -26,10 +26,10 @@ Having that the development environment is established successfully you can proc
 #### Build the applications
 ```bash
 # at repo top dir
-mkdir build
-cd build
-cmake ..
-make
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
 ```
 Result
 ```
@@ -56,6 +56,7 @@ Examples can be found in the [back-office](back-office)
 ### Apps logs and Analytics
 the .devcontainer has bind to the repo dir `.runtime-files`
 apps will create it's Persistent files into it
+
 example:
 ```bash
 GATE-EG-3.xml
@@ -97,8 +98,28 @@ tickets.json
 #             "validity_in_days": 1
 #         }, ...
 ```
+### start the system
+User can start the MQTT broker from his host machine by running at the repo top dir
+```bash
+# at repo top dir
+$ docker compose up
+
+# to stop run `docker compose down`
+```
+#### for the apps user can start them inside the .devcontainer
+after building
+```bash
+$ ./build/back-office/back-office_app
+$ GATE_ID=GATE-1 ./build/gate/gate_app
+$ ./build/ticket-vending-machine/ticket-vending-machine_app
+```
+
 ### Test cases
-sample test
+sample test can be found in `end-to-end-test-script.sh`
+
+
+**Note** ℹ 
+We are assuming that the **ticket request date = creation date in the back-office** and it's reflected in the code this way
 ```mqtt
 PUB /transport/tvm/1/event/create
 {
@@ -107,15 +128,27 @@ PUB /transport/tvm/1/event/create
   "request_date":1768071041
 }
 ```
-Note ℹ
 
-
-We are assuming the request date of ticket creation = creation date
 sample test
 ```mqtt
 PUB /transport/gate/GATE-1/event/validate
-
+PAYLOAD='eyJjcmVhdGlvbl9kYXRlIjoxNzY4MDcxMDQxLCJsaW5lX251bWJlciI6MiwidGlja2V0X2lkIjoxLCJ2YWxpZGl0eV9pbl9kYXlzIjo5OTl9'
 ```
 ### Testing scripts
 in the file `start-new-gate.sh`
 You will see that user is able to start gates at runtime as every gate has it's own id ex:`GATE_ID="GATE-EG-3" $APP_GATE &`
+example
+```bash
+$ ./start-new-gate.sh GATE-EG-7
+    The value of gate_id is: GATE-EG-7
+    [GATE] Started with GateID= GATE-EG-7
+    connecting to the MQTT broker 
+    Connecting...
+    connected...
+    Connected MQTT broker 
+    subscribing to topic: /transport/gate/GATE-EG-7/event/validate
+    subscribed to topic: /transport/gate/GATE-EG-7/event/validate
+    Re-connected! Re-subscribing to ensure topics are active...
+    retrying to handle in the Q .
+```
+
