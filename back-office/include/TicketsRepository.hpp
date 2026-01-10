@@ -15,7 +15,7 @@ public:
     int64_t get_last_ticket_id();
 
 private:
-    std::string file_path;
+    std::string m_json_file_path;
 
     nlohmann::json load();
     void persist(const nlohmann::json& data);

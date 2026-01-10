@@ -4,7 +4,7 @@
 using json = nlohmann::json;
 
 TicketsController::TicketsController(crow::SimpleApp& app, TicketsService& service)
-    : service(service)
+    : m_ticket_service(service)
 {
     CROW_ROUTE(app, "/api/v1/tickets")
         .methods(crow::HTTPMethod::POST)
@@ -22,10 +22,13 @@ TicketsController::TicketsController(crow::SimpleApp& app, TicketsService& servi
 crow::response TicketsController::create_ticket(const crow::request& req)
 {
     auto body = json::parse(req.body, nullptr, false);
-    if (body.is_discarded()) return {400, "Invalid JSON"};
+    if (body.is_discarded())
+    {
+        return {400, "Invalid JSON"};
+    }
 
-    const auto& [err, result] = service.create_ticket_base64(
-        body["validity_days"],
+    const auto& [err, result] = m_ticket_service.create_ticket_base64(
+        body["validity_in_days"],
         body["line_number"],
         body["request_date"]
     );
@@ -43,7 +46,7 @@ crow::response TicketsController::create_ticket(const crow::request& req)
 
 crow::response TicketsController::validate_ticket(const crow::request& req)
 {
-    const auto& [err, result] = service.validate_ticket_base64(req.body);
+    const auto& [err, result] = m_ticket_service.validate_ticket_base64(req.body);
 
     if (err != TicketErrorCode::NoErr)
     {

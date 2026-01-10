@@ -7,7 +7,7 @@ public:
     TicketsController(crow::SimpleApp& app, TicketsService& service);
 
 private:
-    TicketsService& service;
+    TicketsService& m_ticket_service;
 
     crow::response create_ticket(const crow::request& req);
     crow::response validate_ticket(const crow::request& req);

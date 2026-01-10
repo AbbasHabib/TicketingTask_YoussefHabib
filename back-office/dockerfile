@@ -1,0 +1,18 @@
+# TODO: use a smaller docker image for the production app
+FROM mcr.microsoft.com/devcontainers/cpp:1-debian-11
+
+# install libasio
+RUN apt-get install -y libasio-dev
+
+# install Crow
+RUN wget https://github.com/CrowCpp/Crow/archive/refs/tags/v1.3.0.tar.gz && \
+    tar -xzf ./v1.3.0.tar.gz && \
+    cd ./Crow-1.3.0 && \
+    mkdir build && cd build && \
+    cmake .. -DCROW_BUILD_EXAMPLES=OFF -DCROW_BUILD_TESTS=OFF -DCROW_ENABLE_SSL=OFF && \
+    make install
+RUN rm -rf ./v1.3.0.tar.gz ./Crow-1.3.0
+
+COPY build/back-office_app /usr/bin/back-office_app
+
+CMD ["/usr/bin/back-office_app"]

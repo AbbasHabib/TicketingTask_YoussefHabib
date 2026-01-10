@@ -4,11 +4,11 @@
 using json = nlohmann::json;
 
 TicketsRepository::TicketsRepository(const std::string& file)
-    : file_path(file) {}
+    : m_json_file_path(file) {}
 
 json TicketsRepository::load()
 {
-    std::ifstream f(file_path);
+    std::ifstream f(m_json_file_path);
     if (!f.is_open())
     {
         return json{{"tickets", json::array()}};
@@ -20,7 +20,7 @@ json TicketsRepository::load()
 
 void TicketsRepository::persist(const json& data)
 {
-    std::ofstream f(file_path);
+    std::ofstream f(m_json_file_path);
     f << data.dump(4);
 }
 
