@@ -29,12 +29,7 @@ bool TicketProcessor::init()
 
 void TicketProcessor::run()
 {
-    // temp till I make it event queue
-    while(true)
-    {
-        std::cout << "App is running!\n";
-        std::this_thread::sleep_for(std::chrono::seconds(10)); 
-    }
+    m_mqtt_client->run();
 }
 
 void TicketProcessor::record_transaction(const TicketValidation& ticket_validation)

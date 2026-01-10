@@ -1,45 +1,36 @@
 #include "PahoMqttClient.hpp"
 #include <iostream>
+#include <memory>
+#include <string>
 
 
-bool PahoMqttClient::connect(std::string_view server_uri, std::string_view client_id)
+bool PahoMqttClient::connect(const std::string& server_uri, const std::string& client_id)
 {
-    try
+    m_client = std::make_unique<mqtt::client>(server_uri, client_id);
+
+    auto connOpts = mqtt::connect_options_builder()
+        .keep_alive_interval(std::chrono::seconds(20))
+        .clean_session(false)
+        .automatic_reconnect(true)
+        .finalize();
+
+    std::cout << "Connecting..." << std::endl;
+    while (true)
     {
-        static bool once = false;
-        if(!once)
+        try 
         {
-            m_client = std::make_unique<mqtt::async_client>(std::string(server_uri), std::string(client_id));
-            once = true;
+            m_client->connect(connOpts);
+            break; 
         }
-
-        mqtt::connect_options connOpts;
-        connOpts.set_clean_session(false);
-        connOpts.set_automatic_reconnect(true);
-        
-        m_client->connect(connOpts)->wait();
-
-        m_client->set_message_callback([this](mqtt::const_message_ptr msg) {
-            std::cout << "received from mqtt topic=" << msg->get_topic() << " payload= "<< msg->get_payload();
-            auto it = m_topic_map.find(msg->get_topic());
-            if (it != m_topic_map.end())
-            {
-                it->second(msg->get_topic(), msg->to_string());
-            }
-        });
-
-
-        m_client->start_consuming();
-
-        std::cout << "MQTT connected: " << server_uri << ", " << client_id << std::endl;
-
-        return true;
+        catch (const mqtt::exception& exc)
+        {
+            std::cerr << "Broker offline, retrying in 5s..." << std::endl;
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+        }
     }
-    catch (const mqtt::exception& exc)
-    {
-        std::cout << "MQTT connect error: " << exc.what() << std::endl;
-        return false;
-    }
+
+    std::cout << "connected..." << std::endl;
+    return true;
 }
 
 bool PahoMqttClient::is_connected()
@@ -48,22 +39,16 @@ bool PahoMqttClient::is_connected()
 }
 
 bool PahoMqttClient::subscribe_to_topic(const std::string& topic,
-        std::function<void(const std::string&, const std::string&)> callback)
+        std::function<void(const std::string& topic, const std::string& payload)> callback)
 {
     std::cout << "subscribing to topic: " << topic << '\n';
-
-    if (!m_client || !m_client->is_connected())
-    {
-        std::cout << "Not connected !! cant sub to " << topic << '\n';
-        return false;
-    }
 
     try
     {
         m_topic_map[topic] = callback;
-        m_client->subscribe(topic, 0)->wait();
-        
-        std::cout << "subscribed to " << topic << '\n';
+        m_client->subscribe(topic, 1);
+
+        std::cout << "subscribed to topic: " << topic << '\n';
         return true;
     }
     catch (const mqtt::exception& exc)
@@ -73,10 +58,49 @@ bool PahoMqttClient::subscribe_to_topic(const std::string& topic,
     }
 }
 
-PahoMqttClient::~PahoMqttClient()
+void PahoMqttClient::run()
 {
-    if (m_client && m_client->is_connected())
+    bool was_disconnected = true;
+    while (true)
     {
-        m_client->disconnect()->wait();
+        if (was_disconnected && m_client->is_connected())
+        {
+            try
+            {
+                std::cout << "Re-connected! Re-subscribing to ensure topics are active..." << std::endl;
+                for(auto& [topic, _] : m_topic_map)
+                {
+                    m_client->subscribe(topic, 1);
+                }
+                was_disconnected = false;
+            }
+            catch (const mqtt::exception& exc)
+            {
+                std::cout << "MQTT subscribe error: " << exc.what() << std::endl;
+            }
+        }
+
+        mqtt::const_message_ptr msg;
+        if (m_client->try_consume_message_for(&msg, std::chrono::seconds(1)))
+        {
+            if (msg)
+            {
+                std::cout << "Topic: " << msg->get_topic() << " | Payload: " << msg->to_string() << std::endl;
+                if(auto it = m_topic_map.find(msg->get_topic()); it != m_topic_map.end())
+                {
+                    it->second(msg->get_topic(), msg->get_payload());
+                }
+            }
+        }
+
+        // Optional: Periodic health check or internal tasks
+        if (!m_client->is_connected()) {
+            was_disconnected = true;
+            std::cout << "Waiting for auto-reconnect..." << std::endl;
+        }
     }
 }
+
+
+
+PahoMqttClient::~PahoMqttClient() = default;
