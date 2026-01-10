@@ -1,0 +1,44 @@
+
+### Create new Ticket
+### Exptected Similar Response eyJjcmVhdGlvbl9kYXRlIjoxNzY3OTgzNDg5LCJsaW5lX251bWJlciI6MSwidGlja2V0X2lkIjowLCJ2YWxpZGl0eV9pbl9kYXlzIjoxfQ==
+POST http://127.0.0.1:55556/api/v1/tickets HTTP/1.1
+content-type: application/json
+
+{
+    "validity_in_days": 1,
+    "line_number": 1,
+    "request_date": 1767983489
+}
+
+### Validate first ticket with prev data
+### decoded {"creation_date":1767983489,"line_number":1,"ticket_id":1,"validity_in_days":1}
+### Exptected Similar Response {"reason":"VALIDATED","ticket_id":0,"valid":true}
+GET http://127.0.0.1:55556/api/v1/tickets/validations HTTP/1.1
+
+eyJjcmVhdGlvbl9kYXRlIjoxNzY3OTgzNDg5LCJsaW5lX251bWJlciI6MSwidGlja2V0X2lkIjowLCJ2YWxpZGl0eV9pbl9kYXlzIjoxfQ==
+
+
+### Validate first ticket with prev data in different order
+### decoded {"validity_in_days":1,"creation_date":1767983489,"line_number":1,"ticket_id":1}
+### Expected {"reason":"VALIDATED","ticket_id":1,"valid":true}
+GET http://127.0.0.1:55556/api/v1/tickets/validations HTTP/1.1
+
+eyJjcmVhdGlvbl9kYXRlIjoxNzY3OTgzNDg5LCJsaW5lX251bWJlciI6MSwidGlja2V0X2lkIjoxLCJ2YWxpZGl0eV9pbl9kYXlzIjoxfQ==
+
+### Try to push an expired ticket
+### expected  400 Bad Request : ticket already expired
+POST http://127.0.0.1:55556/api/v1/tickets HTTP/1.1
+content-type: application/json
+
+{
+    "validity_in_days": 1,
+    "line_number": 1,
+    "request_date": 1767897089
+}
+
+### Validate an expired ticket
+### {"validity_in_days": 1,"line_number": 1,"creation_date": 1767897089, "ticket_id":77}
+GET http://127.0.0.1:55556/api/v1/tickets/validations HTTP/1.1
+
+eyJ2YWxpZGl0eV9pbl9kYXlzIjogMSwibGluZV9udW1iZXIiOiAxLCJjcmVhdGlvbl9kYXRlIjogMTc2Nzg5NzA4OSwgInRpY2tldF9pZCI6Nzd9
+
