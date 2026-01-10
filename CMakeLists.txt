@@ -9,6 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Needed for clangd the LSP
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Enable/Disable output of compile commands during generation for a target." FORCE)
 
+add_subdirectory(proto)
 add_subdirectory(back-office)
 add_subdirectory(gate)
 add_subdirectory(ticket-vending-machine)
