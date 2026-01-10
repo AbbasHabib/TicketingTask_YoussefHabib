@@ -31,7 +31,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE MQTT_SERVER_URI="mqtt://127.0.0.1:55555")
 target_compile_definitions(${PROJECT_NAME} PRIVATE HTTP_SERVER_URI="http://127.0.0.1:55556")
-target_compile_definitions(${PROJECT_NAME} PRIVATE MQTT_CLIENT_NAME="GATE")
 target_compile_definitions(${PROJECT_NAME} PRIVATE GATE_ID_ENV="GATE_ID")
 
 target_include_directories(${PROJECT_NAME} PRIVATE
