@@ -32,16 +32,6 @@ RUN wget https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz 
     cp -r ./json/include/* /usr/include/ && \
     rm -rf ./json ./json.tar.xz
 
-# install cppcodec
-# RUN wget https://github.com/tplgy/cppcodec/archive/refs/tags/v0.2.tar.gz && \
-#     tar -xzf ./v0.2.tar.gz && \
-#     cd ./cppcodec-0.2/ && \
-#     mkdir build && cd build && \
-#     cmake .. -DBUILD_TESTING=OFF && \
-#     make install
-# RUN rm -rf ./v0.2.tar.gz /cppcodec-0.2/
-
-
 # install grpc
 RUN apt-get install -y \
     protobuf-compiler=3.12.4-1+deb11u1 \
@@ -71,3 +61,15 @@ RUN wget https://github.com/libcpr/cpr/archive/refs/tags/1.12.0.tar.gz && \
 RUN rm -rf ./1.12.0.tar.gz ./cpr-1.12.0/
 
 
+# install paho.mqtt.c and paho.mqtt.cpp
+RUN git clone https://github.com/eclipse/paho.mqtt.cpp && \
+    cd paho.mqtt.cpp && \
+    git checkout v1.5.3 && \
+    git submodule init && \
+    git submodule update && \
+    cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=OFF -DPAHO_WITH_SSL=OFF && \
+    cmake --build build/ --target install
+RUN rm -rf ./paho.mqtt.cpp
+
+
+RUN apt-get install -y libtinyxml2-dev=8.0.0+dfsg-2
