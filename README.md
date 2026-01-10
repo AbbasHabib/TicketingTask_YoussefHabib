@@ -46,7 +46,7 @@ after build the proto folder contains the in repo top dir will contain generated
 docker compose up will start
 - MQTT Broker : TCP Port `29999` 
 - Back-Office HTTP Server : TCP Port `55556` 
-- Back-Office gRPC Server : TCP Port `55557` 
+- Back-Office gRPC Server : TCP Port `55559` 
 - client gate application
 - client ticket-vending-machine application
 
