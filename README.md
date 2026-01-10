@@ -44,7 +44,7 @@ after build the proto folder contains the in repo top dir will contain generated
 
 ### Use docker compose to fire up all the apps
 docker compose up will start
-- MQTT Broker : TCP Port `55555` 
+- MQTT Broker : TCP Port `29999` 
 - Back-Office HTTP Server : TCP Port `55556` 
 - Back-Office gRPC Server : TCP Port `55557` 
 - client gate application
@@ -116,4 +116,6 @@ sample test
 PUB /transport/gate/GATE-1/event/validate
 
 ```
-
+### Testing scripts
+in the file `start-new-gate.sh`
+You will see that user is able to start gates at runtime as every gate has it's own id ex:`GATE_ID="GATE-EG-3" $APP_GATE &`
