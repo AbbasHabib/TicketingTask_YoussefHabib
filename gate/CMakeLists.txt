@@ -27,6 +27,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     PahoMqttCpp::paho-mqttpp3
     cpr::cpr
     ${TINYXML2_LIBRARY}
+    transaction_tracking
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE MQTT_SERVER_URI="mqtt://127.0.0.1:55555")

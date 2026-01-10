@@ -34,10 +34,13 @@ RUN wget https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz 
 
 # install grpc
 RUN apt-get install -y \
-    protobuf-compiler=3.12.4-1+deb11u1 \
-    libprotobuf-dev=3.12.4-1+deb11u1 \
-    grpc-proto=0.0~git20200526.dd2dca3-1.1 \
-    libgrpc++-dev=1.30.2-3
+    protobuf-compiler \
+    libprotobuf-dev \
+    grpc-proto \
+    libgrpc++-dev \
+    protobuf-compiler-grpc \
+    libgrpc-dev
+
 
 # install libasio
 RUN apt-get install -y libasio-dev
@@ -71,5 +74,6 @@ RUN git clone https://github.com/eclipse/paho.mqtt.cpp && \
     cmake --build build/ --target install
 RUN rm -rf ./paho.mqtt.cpp
 
-
+# install libtinyxml2
 RUN apt-get install -y libtinyxml2-dev=8.0.0+dfsg-2
+

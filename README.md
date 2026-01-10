@@ -37,4 +37,18 @@ build/
  |/back-office/
  |/gate/
  |/ticket-vending-machine/
+ |/proto
 ```
+
+after build the proto folder contains the in repo top dir will contain generated protobuf grpc c++ code to compile into a lib and be used by the `back-office` service and `gate` client
+
+### Use docker compose to fire up all the apps
+docker compose up will start
+- MQTT Broker : TCP Port `55555` 
+- Back-Office HTTP Server : TCP Port `55556` 
+- Back-Office gRPC Server : TCP Port `55557` 
+- client gate application
+- client ticket-vending-machine application
+
+# User can use postman to test HTTP and gRPC server (back-office)
+Examples can be found in the [back-office](back-office)
