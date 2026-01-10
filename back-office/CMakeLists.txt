@@ -6,14 +6,15 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+find_package(Crow REQUIRED)
+
+
 add_executable(${PROJECT_NAME}
     src/main.cpp
     src/TicketsController.cpp
     src/TicketsRepository.cpp
     src/TicketsService.cpp
 )
-
-find_package(Crow REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE TICKETS_FILE_PATH="/data/tickets.json")
 
