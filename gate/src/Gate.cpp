@@ -3,6 +3,7 @@
 #include "PahoMqttClient.hpp"
 #include "CprHttpClient.hpp"
 #include "TicketProcessor.hpp"
+#include "TransactionTrackingClient.hpp"
 #include <iostream>
 #include <memory>
 
@@ -11,7 +12,8 @@ Gate::Gate(GateId gate_id) :
     m_gate_id(gate_id),
     m_mqtt_client(std::make_shared<PahoMqttClient>()),
     m_http_client(std::make_shared<CprHttpClient>()),
-    m_ticket_processor(std::make_unique<TicketProcessor>(m_mqtt_client, m_http_client, gate_id))
+    m_grpc_client(std::make_shared<TransactionTrackingClient>("127.0.0.1:55559")),
+    m_ticket_processor(std::make_unique<TicketProcessor>(m_mqtt_client, m_http_client, m_grpc_client, gate_id))
 {
 }
 

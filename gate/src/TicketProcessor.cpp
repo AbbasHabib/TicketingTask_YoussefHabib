@@ -1,19 +1,27 @@
 #include "TicketProcessor.hpp"
 #include "IHttpClient.hpp"
 #include "Ticket.hpp"
-#include <chrono>
+#include "TransactionTrackingClient.hpp"
 #include <crow/utility.h>
 #include <functional>
 #include <iostream>
 #include <tinyxml2.h>
 #include <fstream>
 #include <nlohmann/json.hpp>
-#include <thread>
+#include "GenericRetryQueue.hpp"
 
-TicketProcessor::TicketProcessor(std::shared_ptr<IMqttClient> mqtt_client, std::shared_ptr<IHttpClient> http_client, GateId gate_id) 
+namespace 
+{
+    constexpr auto MAX_SIZE_OF_VALIDATION_Q = 10;
+}
+
+
+TicketProcessor::TicketProcessor(std::shared_ptr<IMqttClient> mqtt_client, std::shared_ptr<IHttpClient> http_client, std::shared_ptr<TransactionTrackingClient> transaction_report_client, GateId gate_id) 
     : m_mqtt_client(mqtt_client),
       m_http_client(http_client),
-      m_gate_id(gate_id)
+      m_transaction_report_client(transaction_report_client),
+      m_gate_id(gate_id),
+      m_retryQ([this](const ValidationStats& v) ->bool {return sendValidationStatsToServer(v);}, MAX_SIZE_OF_VALIDATION_Q)
 {}
 
 bool TicketProcessor::init()
@@ -27,9 +35,39 @@ bool TicketProcessor::init()
     return true;
 }
 
+// will be called by the retry Q
+bool TicketProcessor::sendValidationStatsToServer(const ValidationStats& validation_stat)
+{
+    // string machine_id = 1;
+    // int32 total_processed = 2;
+    // int32 valid_count = 3;  
+    // int32 invalid_count = 4;
+    ticketing::GateTicketsValidationReport report;
+    report.set_machine_id(m_gate_id.str());
+    report.set_total_processed(validation_stat.total);
+    report.set_valid_count(validation_stat.valid);
+    report.set_invalid_count(validation_stat.invalid);
+
+    std::cout << "Sending message to gRPC server!";
+
+    grpc::Status s = m_transaction_report_client->SubmitReport(report);
+
+    if (!s.ok()) 
+    {
+        std::cerr << "SubmitReport failed: " << s.error_message() << "\n";
+        return false;
+    }
+
+    return true;
+}
+
 void TicketProcessor::run()
 {
+    std::jthread t ([this](){
+        m_retryQ.run();
+    });
     m_mqtt_client->run();
+
 }
 
 void TicketProcessor::record_transaction(const TicketValidation& ticket_validation)
@@ -65,6 +103,9 @@ void TicketProcessor::record_transaction(const TicketValidation& ticket_validati
 
     m_last_validations.push_back(ticket_validation);
     build_and_persist_xml();
+
+    // incase no data has to be dropped with every event
+    m_retryQ.push(m_stats);
 }
 
 
@@ -206,20 +247,16 @@ bool TicketProcessor::parse_ticket(const nlohmann::json& body, Ticket& t)
 
 bool TicketProcessor::persist_xml_report(const std::string& xml)
 {
-    namespace fs = std::filesystem;
-
     auto ts = std::time(nullptr);
-    std::string tmp = "/data/gate" + m_gate_id.str() + ".xml.tmp";
-    std::string final = "/data/gate" + m_gate_id.str() + ".xml";
+    std::string final = "/data/" + m_gate_id.str() + ".xml";
 
     {
-        std::ofstream ofs(tmp, std::ios::out | std::ios::trunc);
+        std::ofstream ofs(final, std::ios::out | std::ios::trunc);
         if (!ofs) return false;
         ofs << xml;
         ofs.flush();
     }
 
-    fs::rename(tmp, final); // atomic
     return true;
 }
 

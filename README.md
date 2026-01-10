@@ -50,5 +50,50 @@ docker compose up will start
 - client gate application
 - client ticket-vending-machine application
 
-# User can use postman to test HTTP and gRPC server (back-office)
+### User can use postman to test HTTP and gRPC server (back-office)
 Examples can be found in the [back-office](back-office)
+
+### Apps logs and Analytics
+the .devcontainer has bind to the repo dir `.runtime-files`
+apps will create it's Persistent files into it
+example:
+```bash
+GATE-EG-3.xml
+# <GateReport>
+#     <GateId>GATE-EG-3</GateId>
+#     <Summary>
+#         <TotalValidations>3</TotalValidations>
+#         <ValidCount>3</ValidCount>
+#         <InvalidCount>0</InvalidCount>
+#         <OnlineCount>0</OnlineCount>
+#         <OfflineCount>3</OfflineCount>
+#     </Summary>
+#     <Validations>
+#         <Validation>
+#             <TicketBase64>eyJjcmVhdGlvbl9kYXRlIjoxNzY3OTgzNDg5LCJsaW5lX251bWJlciI6MSwidGlja2V0X2lkIjowLCJ2YWxpZGl0eV9pbl9kYXlzIjoxfQ==</TicketBase64>
+#             <Strategy>OFFLINE</Strategy>
+#             <Result>VALID</Result>
+#             <Timestamp>1768066912</Timestamp>
+#         </Validation>...
+tickets.json
+# {
+#     "tickets": [
+#         {
+#             "creation_date": 1768005495,
+#             "line_number": 1,
+#             "ticket_id": 1,
+#             "validity_in_days": 1
+#         },
+#         {
+#             "creation_date": 1768005502,
+#             "line_number": 1,
+#             "ticket_id": 2,
+#             "validity_in_days": 1
+#         },
+#         {
+#             "creation_date": 1768005509,
+#             "line_number": 1,
+#             "ticket_id": 3,
+#             "validity_in_days": 1
+#         }, ...
+```

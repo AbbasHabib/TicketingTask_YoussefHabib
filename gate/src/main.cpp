@@ -21,7 +21,9 @@ GateId get_env_gate_id()
 int main()
 {   
     GateId gate_id = get_env_gate_id();
-    
+
+    std::cout << "[GATE] Started with GateID= " << gate_id.str() << '\n';
+
     Gate gate(gate_id);
     gate.init();
     gate.run();
