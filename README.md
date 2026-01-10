@@ -40,7 +40,7 @@ build/
  |/proto
 ```
 
-after build the proto folder contains the in repo top dir will contain generated protobuf grpc c++ code to compile into a lib and be used by the `back-office` service and `gate` client
+after build the proto dir in the repo top dir will contain generated protobuf grpc c++ code to be compiled into a shared lib and to be used by the `back-office` service and `gate` client
 
 ### Use docker compose to fire up all the apps
 docker compose up will start
@@ -136,7 +136,7 @@ PAYLOAD='eyJjcmVhdGlvbl9kYXRlIjoxNzY4MDcxMDQxLCJsaW5lX251bWJlciI6MiwidGlja2V0X2l
 ```
 ### Testing scripts
 in the file `start-new-gate.sh`
-You will see that user is able to start gates at runtime as every gate has it's own id ex:`GATE_ID="GATE-EG-3" $APP_GATE &`
+You will see that user is able to start gates at runtime as every gate has its own id ex:`GATE_ID="GATE-EG-3" $APP_GATE &`
 example
 ```bash
 $ ./start-new-gate.sh GATE-EG-7
@@ -151,4 +151,8 @@ $ ./start-new-gate.sh GATE-EG-7
     Re-connected! Re-subscribing to ensure topics are active...
     retrying to handle in the Q .
 ```
+
+## Video showing system interop
+
+[testing-ticketing-sys-sim.webm](https://github.com/user-attachments/assets/54b9bdf2-7e66-4442-b11a-44355265d2e0)
 
