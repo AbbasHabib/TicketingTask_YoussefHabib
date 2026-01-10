@@ -97,3 +97,20 @@ tickets.json
 #             "validity_in_days": 1
 #         }, ...
 ```
+### Test cases
+sample test
+```mqtt
+PUB /transport/tvm/1/event/create
+{
+  "validity_in_days": 999,
+  "line_number":2,
+  "request_date":1768071041
+}
+```
+sample test
+```mqtt
+PUB /transport/gate/GATE-1/event/validate
+eyJjcmVhdGlvbl9kYXRlIjoxNzY4MDcxMjA4LCJsaW5lX251bWJlciI6MiwidGlja2V0X2lkIjo5LCJ2YWxpZGl0eV9pbl9kYXlzIjo5OTl9
+
+```
+

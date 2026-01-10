@@ -1,5 +1,6 @@
 #include "TicketsController.hpp"
 #include "Ticket.hpp"
+#include <crow/logging.h>
 
 using json = nlohmann::json;
 
@@ -15,6 +16,7 @@ TicketsController::TicketsController(crow::SimpleApp& app, TicketsService& servi
     CROW_ROUTE(app, "/api/v1/tickets/validations")
         .methods(crow::HTTPMethod::GET)
         ([this](const crow::request& req) {
+            CROW_LOG_INFO <<  "received on /api/v1/tickets/validations body:" << req.body << '\n';
             return validate_ticket(req);
         });
 }

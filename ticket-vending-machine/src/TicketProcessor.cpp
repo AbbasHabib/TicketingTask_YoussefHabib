@@ -58,12 +58,12 @@ void TicketProcessor::on_new_ticket(const std::string& topic, const std::string&
     {
         if(response->status_code >= 200 && response->status_code < 300)
         {
-            std::cout << "Successfully sent ticket request to the RESTapi response: " << static_cast<std::string>(*response);
+            std::cout << "Successfully sent ticket request to the RESTapi response: " << static_cast<std::string>(*response) << '\n';
             // handle ticket validation OK
         }
         else
         {
-            std::cout << "Bad Request to the RESTapi response: " << static_cast<std::string>(*response);
+            std::cout << "Bad Request to the RESTapi response: " << static_cast<std::string>(*response) << '\n';
             // handle ticket validation failure XML
         }
     }

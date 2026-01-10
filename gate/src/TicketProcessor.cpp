@@ -114,7 +114,7 @@ void TicketProcessor::on_new_ticket(const std::string& topic, const std::string&
 {
     using json = nlohmann::json;
 
-    std::cout << "Received ticket request : topic" << topic << " msg: " << payload;
+    std::cout << "Received ticket request : topic" << topic << " msg: " << payload << '\n';
     
     // invalid requst before sending to the wire
     Ticket t;

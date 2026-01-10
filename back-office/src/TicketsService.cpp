@@ -1,8 +1,10 @@
 #include "TicketsService.hpp"
 #include "Ticket.hpp"
+#include <crow/logging.h>
 #include <crow/utility.h>
 #include <cstdint>
 #include <ctime>
+#include <iostream>
 
 using json = nlohmann::json;
 
@@ -48,8 +50,23 @@ std::pair<TicketErrorCode, std::string> TicketsService::create_ticket_base64(int
 
 std::pair<TicketErrorCode, nlohmann::json> TicketsService::validate_ticket_base64(const std::string& encoded)
 {
+    // {"creation_date":1768071208,"line_number":2,"ticket_id":9,"validity_in_days":999}
+
+    CROW_LOG_INFO << " encoded msg: [ " << encoded << ']' << '\n';
+
     auto decoded = base64_decode(encoded);
-    auto j = json::parse(decoded);
+
+    CROW_LOG_INFO << " decoded msg: [ " << decoded << ']' << '\n';
+    
+    auto j = json::parse(decoded, nullptr, false);
+    if (j.is_discarded())
+    {
+        return {TicketErrorCode::InvalidPayload, {
+            {"valid", false},
+            {"reason", "INVALID_PAYLOAD"}
+            }
+        };
+    }
 
     int64_t ticket_id = j["ticket_id"];
     auto ticket = m_repository.find_by_id(ticket_id);

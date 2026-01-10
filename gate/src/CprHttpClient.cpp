@@ -11,6 +11,7 @@ std::optional<HttpResponse> CprHttpClient::get(
     auto r = cpr::Get(
         cpr::Url{url},
         headers,
+        cpr::Body{body},
         cpr::Timeout{3000} // 3 seconds
     );
 
