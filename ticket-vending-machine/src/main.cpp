@@ -1,8 +1,9 @@
-#include <iostream>
-
+#include "TicketVendingMachine.hpp"
 
 int main()
 {
-    std::cout << "hello\n";
-    return 0;
+    TicketVendingMachine tvm;
+
+    tvm.init();
+    tvm.run();
 }

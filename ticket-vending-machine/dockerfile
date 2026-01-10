@@ -1,0 +1,26 @@
+# TODO: use a smaller docker image for the production app
+FROM mcr.microsoft.com/devcontainers/cpp:1-debian-11
+
+# install libcpr
+RUN wget https://github.com/libcpr/cpr/archive/refs/tags/1.12.0.tar.gz && \
+    tar -xzf ./1.12.0.tar.gz && \
+    cd ./cpr-1.12.0/ && mkdir build && cd build && \
+    cmake -DCPR_ENABLE_SSL=OFF -DCPR_USE_SYSTEM_CURL=ON .. && \
+    cmake --build . --parallel && \
+    cmake --install .
+RUN rm -rf ./1.12.0.tar.gz ./cpr-1.12.0/
+
+# install paho.mqtt.c and paho.mqtt.cpp
+RUN git clone https://github.com/eclipse/paho.mqtt.cpp && \
+    cd paho.mqtt.cpp && \
+    git checkout v1.5.3 && \
+    git submodule init && \
+    git submodule update && \
+    cmake -Bbuild -H. -DPAHO_WITH_MQTT_C=ON -DPAHO_BUILD_EXAMPLES=OFF -DPAHO_WITH_SSL=OFF && \
+    cmake --build build/ --target install
+RUN rm -rf ./paho.mqtt.cpp
+
+
+COPY build/ticket-vending-machine_app /usr/bin/ticket-vending-machine_app
+
+CMD ["/usr/bin/ticket-vending-machine_app"]
