@@ -25,6 +25,10 @@ message("PROTO_FILE=${PROTO_FILE}")
 
 # Generate sources from proto manually
 execute_process(
+    COMMAND mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/generated
+)
+
+execute_process(
     COMMAND protoc -I=${CMAKE_CURRENT_SOURCE_DIR} --cpp_out=${CMAKE_CURRENT_SOURCE_DIR}/generated ${PROTO_FILE}
 )
 execute_process(
