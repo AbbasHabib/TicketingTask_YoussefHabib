@@ -114,6 +114,17 @@ $ GATE_ID=GATE-1 ./build/gate/gate_app
 $ ./build/ticket-vending-machine/ticket-vending-machine_app
 ```
 
+#### run each seperate
+```bash
+# at repo root dir
+docker build -t ticket-vending-machine:v0 -f ./ticket-vending-machine/dockerfile .
+docker run --name ticket-vending-machine-con --network host -v ./transport-ticketing-sim-cpp/.runtime-files:/data/ ticket-vending-machine:v0 
+
+docker build -t gate:v0 -f ./gate/dockerfile -e GATE_ID="GATE-EG-88" .
+docker run --name gate-con --network host -v ./.runtime-files:/data/ gate:v0 
+
+```
+
 ### Test cases
 sample test can be found in `end-to-end-test-script.sh`
 
