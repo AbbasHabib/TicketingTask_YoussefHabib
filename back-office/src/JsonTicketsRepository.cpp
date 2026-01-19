@@ -1,12 +1,14 @@
-#include "TicketsRepository.hpp"
+#include "JsonTicketsRepository.hpp"
 #include <fstream>
+#include <mutex>
+#include <algorithm>
 
 using json = nlohmann::json;
 
-TicketsRepository::TicketsRepository(const std::string& file)
+JsonTicketsRepository::JsonTicketsRepository(const std::string& file)
     : m_json_file_path(file) {}
 
-json TicketsRepository::load()
+json JsonTicketsRepository::load()
 {
     std::ifstream f(m_json_file_path);
     if (!f.is_open())
@@ -15,19 +17,24 @@ json TicketsRepository::load()
     }
     json j;
     f >> j;
+    if (j.is_discarded()) // handle malformed JSON
+    {
+        return json{{"tickets", json::array()}};
+    }
     return j;
 }
 
-void TicketsRepository::persist(const json& data)
+void JsonTicketsRepository::persist(const json& data)
 {
     std::ofstream f(m_json_file_path);
     f << data.dump(4);
 }
 
-void TicketsRepository::save(const Ticket& ticket)
+void JsonTicketsRepository::save(const Ticket& ticket)
 {
+    std::lock_guard<std::mutex> lock(m_mtx);
+
     auto data = load();
-    
     data["tickets"].push_back({
         {"ticket_id", ticket.ticket_id},
         {"creation_date", ticket.creation_date},
@@ -37,8 +44,9 @@ void TicketsRepository::save(const Ticket& ticket)
     persist(data);
 }
 
-std::optional<Ticket> TicketsRepository::find_by_id(int64_t id)
+std::optional<Ticket> JsonTicketsRepository::find_by_id(int64_t id)
 {
+    std::lock_guard<std::mutex> lock(m_mtx);
     auto data = load();
     for (const auto& t : data["tickets"])
     {
@@ -55,8 +63,9 @@ std::optional<Ticket> TicketsRepository::find_by_id(int64_t id)
     return std::nullopt;
 }
 
-std::vector<Ticket> TicketsRepository::find_all()
+std::vector<Ticket> JsonTicketsRepository::find_all()
 {
+    std::lock_guard<std::mutex> lock(m_mtx);
     std::vector<Ticket> result;
     auto data = load();
     for (const auto& t : data["tickets"])
@@ -71,8 +80,9 @@ std::vector<Ticket> TicketsRepository::find_all()
     return result;
 }
 
-int64_t TicketsRepository::get_last_ticket_id()
+int64_t JsonTicketsRepository::get_last_ticket_id()
 {
+    std::lock_guard<std::mutex> lock(m_mtx);
     auto data = load();
     int64_t max_id = 0;
 
@@ -81,4 +91,3 @@ int64_t TicketsRepository::get_last_ticket_id()
     }
     return max_id;
 }
-

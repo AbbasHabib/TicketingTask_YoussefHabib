@@ -12,7 +12,7 @@ find_package(Crow REQUIRED)
 add_executable(${PROJECT_NAME}
     src/main.cpp
     src/TicketsController.cpp
-    src/TicketsRepository.cpp
+    src/JsonTicketsRepository.cpp
     src/TicketsService.cpp
     src/TransactionTrackingServiceImpl.cpp
 )
@@ -29,3 +29,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Crow::Crow
     transaction_tracking
 )
+
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+    message("TESTING ENABLED........")
+endif()

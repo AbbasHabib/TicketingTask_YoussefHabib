@@ -163,6 +163,23 @@ $ ./start-new-gate.sh GATE-EG-7
     retrying to handle in the Q .
 ```
 
+#### Run Unit tests
+```bash
+## at the build dir 
+
+# for app back-office
+$ GTEST_COLOR=1 ctest --test-dir ./back-office/tests/  -V
+```
+#### Generate Coverage Report
+```bash
+$ cmake -DBUILD_TESTING=1 -DENABLE_COVERAGE=1 ..
+$ GTEST_COLOR=1 ctest --test-dir ./back-office/tests/  -V
+$ make -j
+$ lcov --directory . --zerocounters
+$ lcov --directory . --capture --output-file coverage.info
+$ lcov --remove coverage.info '/usr/*' '*generated*' '*tests*' --output-file coverage.info
+$ genhtml coverage.info --output-directory coverage_report
+```
 ## Video showing system interop
 
 [testing-ticketing-sys-sim.webm](https://github.com/user-attachments/assets/54b9bdf2-7e66-4442-b11a-44355265d2e0)

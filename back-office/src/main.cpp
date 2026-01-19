@@ -1,6 +1,6 @@
 #include <crow.h>
 #include <thread>
-#include "TicketsRepository.hpp"
+#include "JsonTicketsRepository.hpp"
 #include "TicketsService.hpp"
 #include "TicketsController.hpp"
 #include "TransactionTrackingService.hpp"
@@ -13,7 +13,7 @@ int main() {
     crow::SimpleApp app;
 
     // TICKETS_FILE_PATH defined in the build sys
-    TicketsRepository repo(TICKETS_FILE_PATH);
+    JsonTicketsRepository repo(TICKETS_FILE_PATH);
     // inject the repo dependency
     TicketsService service(repo);
     // inject the service and app dependency
