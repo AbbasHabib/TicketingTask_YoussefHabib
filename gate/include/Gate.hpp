@@ -3,6 +3,7 @@
 
 #include "GateId.hpp"
 #include "IMqttClient.hpp"
+#include "ITicketReceiver.hpp"
 #include "TicketProcessor.hpp"
 #include <memory>
 
@@ -18,5 +19,6 @@ private:
     std::shared_ptr<IMqttClient> m_mqtt_client;
     std::shared_ptr<IHttpClient> m_http_client;
     std::shared_ptr<TransactionTrackingClient> m_grpc_client;
-    std::unique_ptr<TicketProcessor> m_ticket_processor;
+    std::shared_ptr<ITicketReceiver> m_ticket_receiver;
+    std::shared_ptr<TicketProcessor> m_ticket_processor;
 };

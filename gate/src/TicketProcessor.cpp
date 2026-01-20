@@ -1,10 +1,12 @@
 #include "TicketProcessor.hpp"
 #include "IHttpClient.hpp"
+#include "ITicketReceiver.hpp"
 #include "Ticket.hpp"
 #include "TransactionTrackingClient.hpp"
 #include <crow/utility.h>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <tinyxml2.h>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -16,27 +18,22 @@ namespace
 }
 
 
-TicketProcessor::TicketProcessor(std::shared_ptr<IMqttClient> mqtt_client, std::shared_ptr<IHttpClient> http_client, std::shared_ptr<TransactionTrackingClient> transaction_report_client, GateId gate_id) 
-    : m_mqtt_client(mqtt_client),
+TicketProcessor::TicketProcessor(std::shared_ptr<ITicketReceiver> ticket_receiver , std::shared_ptr<IHttpClient> http_client, std::shared_ptr<TransactionTrackingClient> transaction_report_client, GateId gate_id) 
+    : m_ticket_receiver_client(ticket_receiver),
       m_http_client(http_client),
       m_transaction_report_client(transaction_report_client),
       m_gate_id(gate_id),
-      m_retryQ([this](const ValidationStats& v) ->bool {return sendValidationStatsToServer(v);}, MAX_SIZE_OF_VALIDATION_Q)
+      m_validation_stats_retryQ([this](const ValidationStats& v) ->bool {return send_validation_stats_to_server(v);}, MAX_SIZE_OF_VALIDATION_Q)
 {}
 
 bool TicketProcessor::init()
 {
-    std::string device_id = m_gate_id.str();
-    // TODO: it's only 1 instance for now make it configurable
-    m_mqtt_client->subscribe_to_topic(std::string("/transport/gate/")+device_id+"/event/validate", 
-        [this](const std::string& topic, const std::string& payload){ 
-            on_new_ticket(topic, payload); 
-        });
+    m_ticket_receiver_client->add_new_ticket_observer(shared_from_this());
     return true;
 }
 
 // will be called by the retry Q
-bool TicketProcessor::sendValidationStatsToServer(const ValidationStats& validation_stat)
+bool TicketProcessor::send_validation_stats_to_server(const ValidationStats& validation_stat)
 {
     // string machine_id = 1;
     // int32 total_processed = 2;
@@ -63,11 +60,7 @@ bool TicketProcessor::sendValidationStatsToServer(const ValidationStats& validat
 
 void TicketProcessor::run()
 {
-    std::jthread t ([this](){
-        m_retryQ.run();
-    });
-    m_mqtt_client->run();
-
+    m_validation_stats_retryQ.run();
 }
 
 void TicketProcessor::record_transaction(const TicketValidation& ticket_validation)
@@ -105,16 +98,14 @@ void TicketProcessor::record_transaction(const TicketValidation& ticket_validati
     build_and_persist_xml();
 
     // incase no data has to be dropped with every event
-    m_retryQ.push(m_stats);
+    m_validation_stats_retryQ.push(m_stats);
 }
 
 
 // TODO: to be hanled by a receiver class
-void TicketProcessor::on_new_ticket(const std::string& topic, const std::string& payload)
+void TicketProcessor::on_new_ticket(const std::string& payload)
 {
     using json = nlohmann::json;
-
-    std::cout << "Received ticket request : topic" << topic << " msg: " << payload << '\n';
     
     // invalid requst before sending to the wire
     Ticket t;
@@ -129,46 +120,44 @@ void TicketProcessor::on_new_ticket(const std::string& topic, const std::string&
     std::cout << "sending \n";
     auto response = m_http_client->get(HTTP_SERVER_URI"/api/v1/tickets/validations", payload);
 
+    ValidationStrategy strategy = ValidationStrategy::OFFLINE;
+    ValidationResult validation_result = ValidationResult::INVALID;
     // case wasn't able to send to remote
     if(!response.has_value())
     {
         std::cout << "Failed to send GET request \n";
         
         std::cout << "validating ticket offline \n";
+
+        strategy = ValidationStrategy::OFFLINE;
         // handle ticket validation failure offline
         if(is_ticket_expired(t))
         {
-            ValidationStrategy strategy = ValidationStrategy::OFFLINE;
-            ValidationResult validation_result = ValidationResult::INVALID;
-            record_transaction({.ticket_base64=payload, .strategy=strategy, .result=validation_result, .timestamp=std::time(nullptr)});
+            std::cout << "Ticket is Expired \n";
+            validation_result = ValidationResult::INVALID;
         }
         else
         {
             std::cout << "Ticket is not Expired \n";
-            ValidationStrategy strategy = ValidationStrategy::OFFLINE;
-            ValidationResult validation_result = ValidationResult::VALID;
-            record_transaction({.ticket_base64=payload, .strategy=strategy, .result=validation_result, .timestamp=std::time(nullptr)});
+            validation_result = ValidationResult::VALID;
         }
     }
     else
     {
+        strategy = ValidationStrategy::ONLINE;
         if(response->status_code >= 200 && response->status_code < 300)
         {
-            std::cout << "Successfully sent ticket request to the RESTapi response: " << static_cast<std::string>(*response);
-
-            ValidationStrategy strategy = ValidationStrategy::ONLINE;
-            ValidationResult validation_result = ValidationResult::VALID;
-            record_transaction({.ticket_base64=payload, .strategy=strategy,.result=validation_result,.timestamp= std::time(nullptr)});
+            std::cout << "Successfully sent ticket request to the RESTapi response: " << static_cast<std::string>(*response) << "\n";
+            validation_result = ValidationResult::VALID;
         }
         else
         {
-            std::cout << "Bad Request to the RESTapi response: " << static_cast<std::string>(*response);
-            
-            ValidationStrategy strategy = ValidationStrategy::ONLINE;
-            ValidationResult validation_result = ValidationResult::INVALID;
-            record_transaction({.ticket_base64=payload, .strategy=strategy,.result=validation_result,.timestamp= std::time(nullptr)});
+            std::cout << "Bad Request to the RESTapi response: " << static_cast<std::string>(*response) << "\n";
+            validation_result = ValidationResult::INVALID;
         }
     }
+
+    record_transaction({.ticket_base64=payload, .strategy=strategy, .result=validation_result, .timestamp=std::time(nullptr)});
 }
 
 

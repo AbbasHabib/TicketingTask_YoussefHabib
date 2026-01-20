@@ -21,6 +21,7 @@ add_executable(${PROJECT_NAME}
     src/Gate.cpp
     src/PahoMqttClient.cpp
     src/TicketProcessor.cpp
+    src/MqttTicketReceiver.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

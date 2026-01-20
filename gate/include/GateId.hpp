@@ -15,6 +15,11 @@ public:
         return value_;
     }
 
+    operator std::string() const
+    {
+        return value_;
+    }
+
 private:
     std::string value_;
 };
