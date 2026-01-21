@@ -10,15 +10,12 @@
 class Gate
 {
 public:
-    Gate(GateId);
+    Gate(std::shared_ptr<ITicketReceiver> ticket_receiver,
+         std::shared_ptr<TicketProcessor> ticket_processor);
 
     bool init();
     void run();
 private:
-    GateId m_gate_id;
-    std::shared_ptr<IMqttClient> m_mqtt_client;
-    std::shared_ptr<IHttpClient> m_http_client;
-    std::shared_ptr<TransactionTrackingClient> m_grpc_client;
     std::shared_ptr<ITicketReceiver> m_ticket_receiver;
     std::shared_ptr<TicketProcessor> m_ticket_processor;
 };

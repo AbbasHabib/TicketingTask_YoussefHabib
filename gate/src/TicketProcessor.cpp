@@ -18,12 +18,16 @@ namespace
 }
 
 
-TicketProcessor::TicketProcessor(std::shared_ptr<ITicketReceiver> ticket_receiver , std::shared_ptr<IHttpClient> http_client, std::shared_ptr<TransactionTrackingClient> transaction_report_client, GateId gate_id) 
+TicketProcessor::TicketProcessor(
+    std::shared_ptr<ITicketReceiver> ticket_receiver,
+    std::shared_ptr<IHttpClient> http_client,
+    std::shared_ptr<ITransactionTrackingClient> transaction_report_client,
+    GateId gate_id)
     : m_ticket_receiver_client(ticket_receiver),
       m_http_client(http_client),
       m_transaction_report_client(transaction_report_client),
       m_gate_id(gate_id),
-      m_validation_stats_retryQ([this](const ValidationStats& v) ->bool {return send_validation_stats_to_server(v);}, MAX_SIZE_OF_VALIDATION_Q)
+      m_validation_stats_retryQ([this](const ValidationStats& v) -> bool {return send_validation_stats_to_server(v);}, MAX_SIZE_OF_VALIDATION_Q)
 {}
 
 bool TicketProcessor::init()

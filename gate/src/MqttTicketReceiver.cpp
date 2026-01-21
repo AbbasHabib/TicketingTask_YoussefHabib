@@ -4,7 +4,7 @@
 
 MqttTicketReceiver::MqttTicketReceiver(std::shared_ptr<IMqttClient> mqtt_client,
                                        GateId gate_id)
-    : m_mqtt_client(std::move(mqtt_client)),
+    : m_mqtt_client(mqtt_client),
       m_gate_id(gate_id)
 {
 }

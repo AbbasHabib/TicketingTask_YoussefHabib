@@ -89,3 +89,7 @@ RUN rm -rf ./googletest-1.17.0.tar.gz ./googletest-1.17.0/
 
 # install lcov
 RUN apt-get install -y lcov
+
+#install boost di
+RUN mkdir -p /usr/include/boost/ && \ 
+    wget https://raw.githubusercontent.com/boost-ext/di/refs/tags/v1.3.2/include/boost/di.hpp -O /usr/include/boost/di.hpp

@@ -77,6 +77,10 @@ RUN rm -rf ./paho.mqtt.cpp
 # install libtinyxml2
 RUN apt-get install -y libtinyxml2-dev=8.0.0+dfsg-2
 
+#install boost di
+RUN mkdir -p /usr/include/boost/ && \ 
+    wget https://raw.githubusercontent.com/boost-ext/di/refs/tags/v1.3.2/include/boost/di.hpp -O /usr/include/boost/di.hpp
+
 WORKDIR /app
 
 COPY ./proto ./proto

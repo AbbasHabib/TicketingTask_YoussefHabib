@@ -5,21 +5,20 @@ class GateId
 {
 public:
     explicit GateId(std::string value)
-        : value_(std::move(value))
+        : m_value(std::move(value))
     {
     }
 
-
     [[nodiscard]] const std::string& str() const noexcept
     {
-        return value_;
+        return m_value;
     }
 
     operator std::string() const
     {
-        return value_;
+        return m_value;
     }
 
 private:
-    std::string value_;
+    std::string m_value;
 };

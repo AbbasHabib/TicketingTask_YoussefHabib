@@ -120,8 +120,8 @@ $ ./build/ticket-vending-machine/ticket-vending-machine_app
 docker build -t ticket-vending-machine:v0 -f ./ticket-vending-machine/dockerfile .
 docker run --name ticket-vending-machine-con --network host -v ./transport-ticketing-sim-cpp/.runtime-files:/data/ ticket-vending-machine:v0 
 
-docker build -t gate:v0 -f ./gate/dockerfile -e GATE_ID="GATE-EG-88" .
-docker run --name gate-con --network host -v ./.runtime-files:/data/ gate:v0 
+docker build -t gate:v0 -f ./gate/dockerfile .
+docker run -e GATE_ID="GATE-EG-88" --name gate-con --network host -v ./.runtime-files:/data/ gate:v0 
 
 ```
 
