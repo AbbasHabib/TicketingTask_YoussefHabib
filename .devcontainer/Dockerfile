@@ -77,3 +77,19 @@ RUN rm -rf ./paho.mqtt.cpp
 # install libtinyxml2
 RUN apt-get install -y libtinyxml2-dev=8.0.0+dfsg-2
 
+# install google test
+RUN wget https://github.com/google/googletest/releases/download/v1.17.0/googletest-1.17.0.tar.gz && \
+    tar -xzf ./googletest-1.17.0.tar.gz && \
+    cd ./googletest-1.17.0/ && \
+    mkdir build && cd build && \
+    cmake .. -DBUILD_SHARED_LIBS=ON -DINSTALL_GTEST=ON -DCMAKE_INSTALL_PREFIX:PATH=/usr && \
+    make -j4 && \
+    make install && ldconfig
+RUN rm -rf ./googletest-1.17.0.tar.gz ./googletest-1.17.0/
+
+# install lcov
+RUN apt-get install -y lcov
+
+#install boost di
+RUN mkdir -p /usr/include/boost/ && \ 
+    wget https://raw.githubusercontent.com/boost-ext/di/refs/tags/v1.3.2/include/boost/di.hpp -O /usr/include/boost/di.hpp

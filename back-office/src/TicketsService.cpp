@@ -2,13 +2,13 @@
 #include "Ticket.hpp"
 #include <crow/logging.h>
 #include <crow/utility.h>
+#include <nlohmann/json.hpp>
 #include <cstdint>
 #include <ctime>
-#include <iostream>
 
 using json = nlohmann::json;
 
-TicketsService::TicketsService(TicketsRepository& repo)
+TicketsService::TicketsService(ITicketsRepository& repo)
     : m_repository(repo) {}
 
 std::pair<TicketErrorCode, std::string> TicketsService::create_ticket_base64(int validity_in_days, int line_number, int64_t request_date)

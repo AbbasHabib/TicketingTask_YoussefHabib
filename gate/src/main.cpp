@@ -1,5 +1,12 @@
+#include "CprHttpClient.hpp"
+#include "GateId.hpp"
 #include "Gate.hpp"
+#include "MqttTicketReceiver.hpp"
+#include "PahoMqttClient.hpp"
+#include "TransactionTrackingClient.hpp"
 #include <iostream>
+#include <boost/di.hpp>
+
 
 GateId get_env_gate_id()
 {
@@ -23,8 +30,25 @@ int main()
     GateId gate_id = get_env_gate_id();
 
     std::cout << "[GATE] Started with GateID= " << gate_id.str() << '\n';
+    
+    namespace di = boost::di;
 
-    Gate gate(gate_id);
-    gate.init();
-    gate.run();
+    auto injector = di::make_injector(
+        di::bind<GateId>.to(gate_id),
+        di::bind<IMqttClient>.to<PahoMqttClient>().in(di::singleton),
+        di::bind<IHttpClient>.to<CprHttpClient>().in(di::singleton),
+        di::bind<ITransactionTrackingClient>.to<TransactionTrackingClient>().in(di::singleton),
+        di::bind<ITicketReceiver>.to<MqttTicketReceiver>().in(di::singleton),
+        di::bind<TicketProcessor>.in(di::singleton)
+    );
+
+    auto gate = injector.create<std::shared_ptr<Gate>>();
+    if(gate->init())
+    {
+        gate->run();
+    }
+    else
+    {
+        std::cerr << "[GATE] Failed to init the gate GateID=" << gate_id.str() << '\n';
+    }
 }

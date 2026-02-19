@@ -1,25 +1,27 @@
 #pragma once
-#include "TicketsRepository.hpp"
+#include "ITicketsService.hpp"
+#include "ITicketsRepository.hpp"
 #include <atomic>
 #include <string>
 
-class TicketsService {
+class TicketsService : public ITicketsService
+{
 public:
-    explicit TicketsService(TicketsRepository& repo);
+    explicit TicketsService(ITicketsRepository& repo);
 
     std::pair<TicketErrorCode, std::string> create_ticket_base64(
         int validity_in_days,
         int line_number,
         int64_t request_date
-    );
+    ) override;
 
-    std::pair<TicketErrorCode, nlohmann::json> validate_ticket_base64(const std::string& base64_ticket);
+    std::pair<TicketErrorCode, nlohmann::json> validate_ticket_base64(const std::string& base64_ticket) override;
 
-    bool is_expired(int64_t creation_date, int64_t validity_in_days);
-    bool is_expired(const Ticket& ticket);
+    bool is_expired(int64_t creation_date, int64_t validity_in_days) override;
+    bool is_expired(const Ticket& ticket) override;
 
 private:
-    TicketsRepository& m_repository;
+    ITicketsRepository& m_repository;
     std::atomic<int64_t> m_id_counter{0};
 
     std::string base64_encode(const std::string& in);

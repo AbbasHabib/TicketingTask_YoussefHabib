@@ -1,10 +1,10 @@
 #include "TicketsController.hpp"
-#include "Ticket.hpp"
 #include <crow/logging.h>
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
-TicketsController::TicketsController(crow::SimpleApp& app, TicketsService& service)
+TicketsController::TicketsController(crow::SimpleApp& app, ITicketsService& service)
     : m_ticket_service(service)
 {
     CROW_ROUTE(app, "/api/v1/tickets")

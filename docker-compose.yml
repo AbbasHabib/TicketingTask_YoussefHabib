@@ -10,3 +10,49 @@ services:
       echo 'allow_anonymous true' >> /mosquitto/config/mosquitto.conf &&
       exec mosquitto -c /mosquitto/config/mosquitto.conf
       "
+    healthcheck:
+      test: [
+          "CMD-SHELL",
+          "sleep 5 && mosquitto_pub -h localhost -p 29999 -t health -m ok || exit 1"
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  back-office:
+    build:
+      context: .
+      dockerfile: back-office/Dockerfile
+    network_mode: host
+    image: back-office:latest
+    volumes:
+      - ./.runtime-files:/data
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+
+  gate:
+    build:
+      context: .
+      dockerfile: gate/Dockerfile
+    image: gate:latest
+    network_mode: host
+    volumes:
+      - ./.runtime-files:/data
+    environment:
+      GATE_ID: GATE-EG-99
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+
+  ticket-vending-machine:
+    build:
+      context: .
+      dockerfile: ticket-vending-machine/Dockerfile
+    network_mode: host
+    volumes:
+      - ./.runtime-files:/data
+    image: ticket-vending-machine:latest
+    depends_on:
+      mosquitto:
+        condition: service_healthy
